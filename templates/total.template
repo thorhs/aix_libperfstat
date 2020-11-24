@@ -1,0 +1,31 @@
+package main
+
+/*
+#cgo LDFLAGS: -lperfstat
+#include <libperfstat.h>
+
+*/
+import "C"
+
+{{ $n := .Name -}}
+{{ $sn := .Name | Title -}}
+{{ $in := .ItemName -}}
+type {{ $sn }}Stat struct {
+{{ range .Labels }}	{{ . | Camel }} string
+{{ end }}
+{{- range .Fields }}
+	{{ .Name | Camel }} float64
+{{- end}}
+}
+
+func Collect{{ $sn }}() {{ $sn }}Stat {
+	{{ .Name }}stat := C.perfstat_{{ .Name }}_total_t{}
+
+	_ = C.perfstat_{{ .Name }}_total(nil, &{{ .Name }}stat, C.sizeof_perfstat_{{ .Name }}_total_t, 1)
+
+	return {{ $sn }}Stat{
+{{- range .Fields }}
+		{{ .Name | Camel }}: float64({{ $n }}stat.{{ .Name | Reserved }}),
+{{- end }}
+	}
+}

@@ -1,0 +1,61 @@
+package main
+
+/*
+#cgo LDFLAGS: -lperfstat
+#include <libperfstat.h>
+
+*/
+import "C"
+
+import (
+{{ if ne .ItemName "psize" }}
+	"unsafe"
+{{ else }}
+	"fmt"
+{{ end }}
+)
+
+{{ $n := .Name -}}
+{{ $sn := .Name | Title -}}
+{{ $in := .ItemName -}}
+type {{ $sn }}Stat struct {
+{{ range .Labels }}	{{ . | Camel }} string
+{{ end }}
+{{- range .Fields }}
+	{{ .Name | Camel }} float64
+{{- end}}
+}
+
+type {{ $sn }}Stats map[string]{{ $sn }}Stat
+
+func Collect{{ $sn }}s() {{ $sn }}Stats {
+	num := C.perfstat_{{ .Name }}(nil, nil, C.sizeof_perfstat_{{ .Name }}_t, 0)
+
+	initStruct := C.{{ .InitStruct }}{}
+	initStruct.{{ .InitStmt }}
+
+	{{ .Name }}stats := make([]C.perfstat_{{ .Name }}_t, num)
+
+	_ = C.perfstat_{{ .Name }}(&initStruct, &{{ .Name }}stats[0], C.sizeof_perfstat_{{ .Name }}_t, num)
+
+	output := make({{ $sn }}Stats)
+
+	for _, data := range {{ .Name }}stats {
+{{ if ne .ItemName "psize" }}
+		{{ .ItemName }} := string(C.GoBytes(unsafe.Pointer(&data.{{ .ItemName }}), C.int(len(data.{{ .ItemName }}))))
+{{ else }}
+		{{ .ItemName }} := fmt.Sprintf("%d", C.long(data.{{ .ItemName }}))
+{{ end }}
+
+		output[{{ .ItemName }}] = {{ $sn }}Stat{
+{{- range .Labels }}
+			{{ . | Camel }}: string(C.GoBytes(unsafe.Pointer(&data.{{ . }}), C.int(len(data.{{ . }})))),
+{{- end -}}
+{{- range .Fields }}
+			{{ .Name | Camel }}: float64(data.{{ .Name | Reserved }}),
+{{- end }}
+		}
+	}
+
+	return output
+}
