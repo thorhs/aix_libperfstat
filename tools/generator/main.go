@@ -45,7 +45,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	output, err := os.Create(fmt.Sprintf("%s.go", dsName))
+	output, err := os.Create(path.Join("generated", fmt.Sprintf("%s.go", dsName)))
 	if err != nil {
 		fmt.Printf("Error opening outptu file: %s\n", err)
 		os.Exit(1)

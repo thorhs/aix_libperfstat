@@ -1,4 +1,4 @@
-package main
+package aix_libperfstat
 
 //go:generate go build -o tools/generator/generator tools/generator/main.go
 //go:generate tools/generator/generator data_sources/disk.multiple

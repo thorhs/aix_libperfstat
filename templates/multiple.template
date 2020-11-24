@@ -1,4 +1,4 @@
-package main
+package generated
 
 /*
 #cgo LDFLAGS: -lperfstat
@@ -8,15 +8,13 @@ package main
 import "C"
 
 import (
-{{ if ne .ItemName "psize" }}
-	"unsafe"
-{{ else }}
+{{ if eq .ItemName "psize" }}
 	"fmt"
 {{ end }}
 )
 
 {{ $n := .Name -}}
-{{ $sn := .Name | Title -}}
+{{ $sn := .Name | Camel -}}
 {{ $in := .ItemName -}}
 type {{ $sn }}Stat struct {
 {{ range .Labels }}	{{ . | Camel }} string
@@ -28,7 +26,7 @@ type {{ $sn }}Stat struct {
 
 type {{ $sn }}Stats map[string]{{ $sn }}Stat
 
-func Collect{{ $sn }}s() {{ $sn }}Stats {
+func Collect{{ $sn | Camel }}s() {{ $sn }}Stats {
 	num := C.perfstat_{{ .Name }}(nil, nil, C.sizeof_perfstat_{{ .Name }}_t, 0)
 
 	initStruct := C.{{ .InitStruct }}{}
@@ -42,14 +40,14 @@ func Collect{{ $sn }}s() {{ $sn }}Stats {
 
 	for _, data := range {{ .Name }}stats {
 {{ if ne .ItemName "psize" }}
-		{{ .ItemName }} := string(C.GoBytes(unsafe.Pointer(&data.{{ .ItemName }}), C.int(len(data.{{ .ItemName }}))))
+		{{ .ItemName }} := C.GoString(&data.{{ .ItemName }}[0])
 {{ else }}
 		{{ .ItemName }} := fmt.Sprintf("%d", C.long(data.{{ .ItemName }}))
 {{ end }}
 
 		output[{{ .ItemName }}] = {{ $sn }}Stat{
 {{- range .Labels }}
-			{{ . | Camel }}: string(C.GoBytes(unsafe.Pointer(&data.{{ . }}), C.int(len(data.{{ . }})))),
+			{{ . | Camel }}: C.GoString(&data.{{ . }}[0]),
 {{- end -}}
 {{- range .Fields }}
 			{{ .Name | Camel }}: float64(data.{{ .Name | Reserved }}),
