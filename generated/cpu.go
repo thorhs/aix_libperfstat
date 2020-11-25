@@ -89,7 +89,12 @@ type CpuStat struct {
 type CpuStats map[string]CpuStat
 
 func CollectCpus() CpuStats {
-	num := C.perfstat_cpu(nil, nil, C.sizeof_perfstat_cpu_t, 0)
+	output := make(CpuStats)
+
+num := C.perfstat_cpu(nil, nil, C.sizeof_perfstat_cpu_t, 0)
+if num == 0 {
+		return output
+	}
 
 	initStruct := C.perfstat_id_t{}
 	initStruct.name[0]=0
@@ -97,8 +102,6 @@ func CollectCpus() CpuStats {
 	cpustats := make([]C.perfstat_cpu_t, num)
 
 	_ = C.perfstat_cpu(&initStruct, &cpustats[0], C.sizeof_perfstat_cpu_t, num)
-
-	output := make(CpuStats)
 
 	for _, data := range cpustats {
 

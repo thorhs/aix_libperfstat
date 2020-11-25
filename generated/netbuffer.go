@@ -25,7 +25,12 @@ type NetbufferStat struct {
 type NetbufferStats map[string]NetbufferStat
 
 func CollectNetbuffers() NetbufferStats {
-	num := C.perfstat_netbuffer(nil, nil, C.sizeof_perfstat_netbuffer_t, 0)
+	output := make(NetbufferStats)
+
+num := C.perfstat_netbuffer(nil, nil, C.sizeof_perfstat_netbuffer_t, 0)
+if num == 0 {
+		return output
+	}
 
 	initStruct := C.perfstat_id_t{}
 	initStruct.name[0]=0
@@ -33,8 +38,6 @@ func CollectNetbuffers() NetbufferStats {
 	netbufferstats := make([]C.perfstat_netbuffer_t, num)
 
 	_ = C.perfstat_netbuffer(&initStruct, &netbufferstats[0], C.sizeof_perfstat_netbuffer_t, num)
-
-	output := make(NetbufferStats)
 
 	for _, data := range netbufferstats {
 

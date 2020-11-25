@@ -53,7 +53,12 @@ type NetadapterStat struct {
 type NetadapterStats map[string]NetadapterStat
 
 func CollectNetadapters() NetadapterStats {
-	num := C.perfstat_netadapter(nil, nil, C.sizeof_perfstat_netadapter_t, 0)
+	output := make(NetadapterStats)
+
+num := C.perfstat_netadapter(nil, nil, C.sizeof_perfstat_netadapter_t, 0)
+if num == 0 {
+		return output
+	}
 
 	initStruct := C.perfstat_id_t{}
 	initStruct.name[0]=0
@@ -61,8 +66,6 @@ func CollectNetadapters() NetadapterStats {
 	netadapterstats := make([]C.perfstat_netadapter_t, num)
 
 	_ = C.perfstat_netadapter(&initStruct, &netadapterstats[0], C.sizeof_perfstat_netadapter_t, num)
-
-	output := make(NetadapterStats)
 
 	for _, data := range netadapterstats {
 

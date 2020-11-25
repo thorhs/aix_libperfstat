@@ -31,7 +31,12 @@ type NetinterfaceStat struct {
 type NetinterfaceStats map[string]NetinterfaceStat
 
 func CollectNetinterfaces() NetinterfaceStats {
-	num := C.perfstat_netinterface(nil, nil, C.sizeof_perfstat_netinterface_t, 0)
+	output := make(NetinterfaceStats)
+
+num := C.perfstat_netinterface(nil, nil, C.sizeof_perfstat_netinterface_t, 0)
+if num == 0 {
+		return output
+	}
 
 	initStruct := C.perfstat_id_t{}
 	initStruct.name[0]=0
@@ -39,8 +44,6 @@ func CollectNetinterfaces() NetinterfaceStats {
 	netinterfacestats := make([]C.perfstat_netinterface_t, num)
 
 	_ = C.perfstat_netinterface(&initStruct, &netinterfacestats[0], C.sizeof_perfstat_netinterface_t, num)
-
-	output := make(NetinterfaceStats)
 
 	for _, data := range netinterfacestats {
 

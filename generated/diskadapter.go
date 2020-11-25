@@ -42,7 +42,12 @@ type DiskadapterStat struct {
 type DiskadapterStats map[string]DiskadapterStat
 
 func CollectDiskadapters() DiskadapterStats {
-	num := C.perfstat_diskadapter(nil, nil, C.sizeof_perfstat_diskadapter_t, 0)
+	output := make(DiskadapterStats)
+
+num := C.perfstat_diskadapter(nil, nil, C.sizeof_perfstat_diskadapter_t, 0)
+if num == 0 {
+		return output
+	}
 
 	initStruct := C.perfstat_id_t{}
 	initStruct.name[0]=0
@@ -50,8 +55,6 @@ func CollectDiskadapters() DiskadapterStats {
 	diskadapterstats := make([]C.perfstat_diskadapter_t, num)
 
 	_ = C.perfstat_diskadapter(&initStruct, &diskadapterstats[0], C.sizeof_perfstat_diskadapter_t, num)
-
-	output := make(DiskadapterStats)
 
 	for _, data := range diskadapterstats {
 

@@ -46,7 +46,12 @@ type MemoryPageStat struct {
 type MemoryPageStats map[string]MemoryPageStat
 
 func CollectMemoryPages() MemoryPageStats {
-	num := C.perfstat_memory_page(nil, nil, C.sizeof_perfstat_memory_page_t, 0)
+	output := make(MemoryPageStats)
+
+num := C.perfstat_memory_page(nil, nil, C.sizeof_perfstat_memory_page_t, 0)
+if num == 0 {
+		return output
+	}
 
 	initStruct := C.perfstat_psize_t{}
 	initStruct.psize=0
@@ -54,8 +59,6 @@ func CollectMemoryPages() MemoryPageStats {
 	memory_pagestats := make([]C.perfstat_memory_page_t, num)
 
 	_ = C.perfstat_memory_page(&initStruct, &memory_pagestats[0], C.sizeof_perfstat_memory_page_t, num)
-
-	output := make(MemoryPageStats)
 
 	for _, data := range memory_pagestats {
 

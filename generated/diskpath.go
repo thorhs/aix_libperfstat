@@ -40,7 +40,12 @@ type DiskpathStat struct {
 type DiskpathStats map[string]DiskpathStat
 
 func CollectDiskpaths() DiskpathStats {
-	num := C.perfstat_diskpath(nil, nil, C.sizeof_perfstat_diskpath_t, 0)
+	output := make(DiskpathStats)
+
+num := C.perfstat_diskpath(nil, nil, C.sizeof_perfstat_diskpath_t, 0)
+if num == 0 {
+		return output
+	}
 
 	initStruct := C.perfstat_id_t{}
 	initStruct.name[0]=0
@@ -48,8 +53,6 @@ func CollectDiskpaths() DiskpathStats {
 	diskpathstats := make([]C.perfstat_diskpath_t, num)
 
 	_ = C.perfstat_diskpath(&initStruct, &diskpathstats[0], C.sizeof_perfstat_diskpath_t, num)
-
-	output := make(DiskpathStats)
 
 	for _, data := range diskpathstats {
 

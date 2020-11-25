@@ -45,7 +45,12 @@ type DiskStat struct {
 type DiskStats map[string]DiskStat
 
 func CollectDisks() DiskStats {
-	num := C.perfstat_disk(nil, nil, C.sizeof_perfstat_disk_t, 0)
+	output := make(DiskStats)
+
+num := C.perfstat_disk(nil, nil, C.sizeof_perfstat_disk_t, 0)
+if num == 0 {
+		return output
+	}
 
 	initStruct := C.perfstat_id_t{}
 	initStruct.name[0]=0
@@ -53,8 +58,6 @@ func CollectDisks() DiskStats {
 	diskstats := make([]C.perfstat_disk_t, num)
 
 	_ = C.perfstat_disk(&initStruct, &diskstats[0], C.sizeof_perfstat_disk_t, num)
-
-	output := make(DiskStats)
 
 	for _, data := range diskstats {
 
