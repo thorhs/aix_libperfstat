@@ -23,6 +23,8 @@ type InputData struct {
 	Fields     []Field
 	InitStruct string
 	InitStmt   string
+	StructName string
+	FuncName   string
 }
 
 func main() {
@@ -58,6 +60,8 @@ func main() {
 	dsLabels := make([]string, 0)
 	dsInitStruct := ""
 	dsInitStmt := ""
+	dsStructName := dsName
+	dsFuncName := dsName
 
 	// 'total' data sources don't include header nor init line
 	if dsType != "total" {
@@ -85,14 +89,21 @@ func main() {
 		}
 
 		line = scanner.Text()
-		tokens = strings.SplitN(line, " ", 2)
-		if len(tokens) != 2 {
+		tokens = strings.Split(line, " ")
+		if len(tokens) < 2 || len(tokens) > 4 {
 			fmt.Printf("Too few items of initialization line of data souce, header line was: '%s'\n", line)
 			os.Exit(1)
 		}
 
 		dsInitStruct = tokens[0]
 		dsInitStmt = tokens[1]
+		if len(tokens) > 2 {
+			dsStructName = tokens[2]
+		}
+
+		if len(tokens) > 3 {
+			dsFuncName = tokens[3]
+		}
 	}
 
 	fields := make([]Field, 0)
@@ -127,6 +138,8 @@ func main() {
 		fields,
 		dsInitStruct,
 		dsInitStmt,
+		dsStructName,
+		dsFuncName,
 	}
 
 	err = templ.ExecuteTemplate(output, dsTemplateName, inputData)

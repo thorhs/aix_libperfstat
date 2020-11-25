@@ -1,0 +1,10 @@
+name id
+perfstat_id_t name[0]=0 bio_dev bio_stats
+counter	rbytes	Bytes read
+counter	wbytes	Bytes Written
+counter	rerrs	Number of read errors
+counter	werrs	Number of write errors
+counter	rtime	Aggregate time (reads)
+counter	wtime	Aggregate time (writes)
+counter	nread	Number of reads
+counter	nwrite	Number of writes

@@ -117,6 +117,22 @@ func TestNetinterfaces(t *testing.T) {
 	}
 }
 
+/*
+func TestBio(t *testing.T) {
+	bio_stats := generated.CollectBioStats()
+
+	if len(bio_stats) < 1 {
+		t.Error("Empty set of bio_stat returned")
+	}
+
+	for bio_stat, data := range bio_stats {
+		if data.Nread == 0  {
+			t.Errorf("Bio_stat '%s' is reporting 0 in nread", bio_stat)
+		}
+	}
+}
+*/
+
 func TestMemory(t *testing.T) {
 	memory := generated.CollectMemory()
 
